@@ -5,6 +5,9 @@ import connectDB from './config/db.js';
 import User from './models/User.js';
 import Restaurant from './models/Restaurant.js';
 import authRoutes from './routes/authRoutes.js';
+import restaurantRoutes from './routes/restaurantRoutes.js';
+import menuRoutes from './routes/menuRoutes.js';
+import path from 'path';
 
 dotenv.config();
 
@@ -17,6 +20,11 @@ connectDB();
 
 // Routes
 app.use('/api/auth', authRoutes);
+app.use('/api/restaurants', restaurantRoutes);
+app.use('/api/menu', menuRoutes);
+
+const __dirname = path.resolve();
+app.use('/uploads', express.static(path.join(__dirname, '/uploads')));
 
 const PORT = process.env.PORT || 5000;
 
