@@ -4,6 +4,7 @@ import dotenv from 'dotenv';
 import connectDB from './config/db.js';
 import User from './models/User.js';
 import Restaurant from './models/Restaurant.js';
+import authRoutes from './routes/authRoutes.js';
 
 dotenv.config();
 
@@ -13,6 +14,9 @@ app.use(cors());
 app.use(express.json());
 
 connectDB();
+
+// Routes
+app.use('/api/auth', authRoutes);
 
 const PORT = process.env.PORT || 5000;
 
