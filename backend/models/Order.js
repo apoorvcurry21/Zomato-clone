@@ -59,6 +59,10 @@ const orderSchema = new mongoose.Schema({
   pincode: {
     type: String,
     required: true
+  },
+  razorpayOrderId: {
+    type: String,
+    required: true
   }
 }, { timestamps: true });
 

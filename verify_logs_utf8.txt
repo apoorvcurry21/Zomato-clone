@@ -1,0 +1,15 @@
+﻿--- 1. Login as Customer ---
+--- 2. Fetch a Restaurant and its Menu ---
+Using Restaurant: Pizza Palace (ID: 699d7059869eddb212ac2287)
+Ordering: Margherita Pizza (Price: 299)
+
+--- 3. Testing Order Creation (Invalid Pincode) ---
+Status with 999999: 400 (Restaurant does not serve this pincode)
+
+--- 4. Testing Order Creation (Valid Flow with Coupon) ---
+Failed to create order: undefined
+
+--- 5. Testing Order History (/api/orders/myorders) ---
+Orders found in history: 0
+
+Ô£à ORDER MANAGEMENT VERIFICATION COMPLETE!
