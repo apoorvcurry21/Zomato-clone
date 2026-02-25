@@ -60,8 +60,10 @@ const orderSchema = new mongoose.Schema({
     type: String,
     required: true
   },
-  razorpayOrderId: {
+  paymentMethod: {
     type: String,
+    enum: ['COD', 'Online'],
+    default: 'COD',
     required: true
   }
 }, { timestamps: true });

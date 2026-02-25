@@ -6,6 +6,12 @@ import connectDB from './config/db.js';
 dotenv.config();
 
 import User from './models/User.js';
+import Restaurant from './models/Restaurant.js';
+import authRoutes from './routes/authRoutes.js';
+import restaurantRoutes from './routes/restaurantRoutes.js';
+import menuRoutes from './routes/menuRoutes.js';
+import orderRoutes from './routes/orderRoutes.js';
+import path from 'path';
 
 const app = express();
 

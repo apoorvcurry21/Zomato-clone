@@ -1,9 +1,7 @@
-import crypto from 'crypto';
 import Order from '../models/Order.js';
 import MenuItem from '../models/MenuItem.js';
 import Restaurant from '../models/Restaurant.js';
 import Coupon from '../models/Coupon.js';
-import razorpay from '../config/razorpay.js';
 import { getValidatedCoupon } from './couponController.js';
 
 // @desc    Create new order & initialize Razorpay
@@ -66,17 +64,7 @@ export const createOrder = async (req, res, next) => {
             }
         }
 
-        // 4. Initialize Razorpay Order
-        // Razorpay expects amount in paise (1 INR = 100 Paise)
-        const options = {
-            amount: Math.round(discountedAmount * 100),
-            currency: 'INR',
-            receipt: `receipt_${Date.now()}`,
-        };
-
-        const razorpayOrder = await razorpay.orders.create(options);
-
-        // 5. Save Pending Order to DB
+        // 4. Save COD Order to DB
         const order = await Order.create({
             customer: req.user._id,
             restaurant: restaurantId,
@@ -85,63 +73,25 @@ export const createOrder = async (req, res, next) => {
             discountedAmount: discount,
             couponUsed: appliedCoupon,
             pincode: deliveryPincode,
+            paymentMethod: 'COD',
             paymentStatus: 'pending',
-            orderStatus: 'placed', // or 'pending' depending on flow
-            // Store razorpayOrderId for verification later
-            razorpayOrderId: razorpayOrder.id
+            orderStatus: 'placed'
         });
 
         res.status(201).json({
-            order,
-            razorpayOrder
+            message: 'Order placed successfully (COD)',
+            order
         });
     } catch (error) {
         next(error);
     }
 };
 
-// @desc    Verify Razorpay Payment
+// @desc    Verify Payment (Stub for COD)
 // @route   POST /api/orders/verify
 // @access  Private/Customer
 export const verifyPayment = async (req, res, next) => {
-    try {
-        const { razorpay_order_id, razorpay_payment_id, razorpay_signature } = req.body;
-
-        const body = razorpay_order_id + "|" + razorpay_payment_id;
-
-        const expectedSignature = crypto
-            .createHmac('sha256', process.env.RAZORPAY_KEY_SECRET)
-            .update(body.toString())
-            .digest('hex');
-
-        const isMatch = expectedSignature === razorpay_signature;
-
-        if (isMatch) {
-            // Find the order using razorpayOrderId
-            // Note: We might need to add razorpayOrderId to the schema if not there, 
-            // but let's assume we can search by it or use a separate field.
-            // Refactoring Step: Adding razorpayOrderId to Order model if it's missing is good, 
-            // but for now let's update by finding the pending order.
-
-            const order = await Order.findOne({ razorpayOrderId: razorpay_order_id });
-
-            if (!order) {
-                res.status(404);
-                throw new Error('Order not found');
-            }
-
-            order.paymentStatus = 'paid';
-            order.orderStatus = 'placed'; // Confirmed status
-            await order.save();
-
-            res.json({ message: 'Payment verified successfully', order });
-        } else {
-            res.status(400);
-            throw new Error('Invalid signature. Payment verification failed.');
-        }
-    } catch (error) {
-        next(error);
-    }
+    res.json({ message: 'COD order does not require online verification.' });
 };
 
 // @desc    Get logged in user orders
