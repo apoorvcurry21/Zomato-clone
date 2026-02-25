@@ -13,6 +13,7 @@ export const updateRestaurantProfile = async (req, res, next) => {
             restaurant.contact = req.body.contact || restaurant.contact;
             restaurant.pincodes = req.body.pincodes || restaurant.pincodes;
             restaurant.estimatedPrepTime = req.body.estimatedPrepTime || restaurant.estimatedPrepTime;
+            restaurant.cuisine = req.body.cuisine || restaurant.cuisine;
 
             const updatedRestaurant = await restaurant.save();
             res.json(updatedRestaurant);
@@ -20,6 +21,67 @@ export const updateRestaurantProfile = async (req, res, next) => {
             res.status(404);
             throw new Error('Restaurant not found');
         }
+    } catch (error) {
+        next(error);
+    }
+};
+
+// @desc    Get restaurants available in a pincode
+// @route   GET /api/restaurants
+// @access  Public
+export const getAvailableRestaurants = async (req, res, next) => {
+    try {
+        const { pincode } = req.query;
+
+        if (!pincode) {
+            res.status(400);
+            throw new Error('Pincode is mandatory');
+        }
+
+        const restaurants = await Restaurant.find({
+            pincodes: pincode,
+            isOpen: true
+        });
+
+        res.json(restaurants);
+    } catch (error) {
+        next(error);
+    }
+};
+
+// @desc    Get featured restaurants
+// @route   GET /api/restaurants/featured
+// @access  Public
+export const getFeaturedRestaurants = async (req, res, next) => {
+    try {
+        const restaurants = await Restaurant.find({ isFeatured: true, isOpen: true }).limit(10);
+        res.json(restaurants);
+    } catch (error) {
+        next(error);
+    }
+};
+
+// @desc    Search restaurants by name or cuisine
+// @route   GET /api/restaurants/search
+// @access  Public
+export const searchRestaurants = async (req, res, next) => {
+    try {
+        const { query } = req.query;
+
+        if (!query) {
+            res.status(400);
+            throw new Error('Search query is required');
+        }
+
+        const restaurants = await Restaurant.find({
+            $or: [
+                { name: { $regex: query, $options: 'i' } },
+                { cuisine: { $regex: query, $options: 'i' } }
+            ],
+            isOpen: true
+        });
+
+        res.json(restaurants);
     } catch (error) {
         next(error);
     }

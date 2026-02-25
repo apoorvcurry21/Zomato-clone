@@ -47,6 +47,11 @@ const restaurantSchema = new mongoose.Schema({
     type: Number,
     default: 0,
     min: 0
+  },
+  cuisine: {
+    type: String,
+    trim: true,
+    default: ''
   }
 }, { timestamps: true });
 
