@@ -65,6 +65,10 @@ const orderSchema = new mongoose.Schema({
     enum: ['COD', 'Online'],
     default: 'COD',
     required: true
+  },
+  estimatedDeliveryTime: {
+    type: String, // or Date, can store things like "30-45 mins" or a specific timestamp
+    default: null
   }
 }, { timestamps: true });
 

@@ -87,11 +87,130 @@ export const createOrder = async (req, res, next) => {
     }
 };
 
-// @desc    Verify Payment (Stub for COD)
-// @route   POST /api/orders/verify
-// @access  Private/Customer
-export const verifyPayment = async (req, res, next) => {
-    res.json({ message: 'COD order does not require online verification.' });
+// @desc    Update order status
+// @route   PATCH /api/orders/:id/status
+// @access  Private (Restaurant/Delivery)
+export const updateOrderStatus = async (req, res, next) => {
+    try {
+        const { status, estimatedDeliveryTime } = req.body;
+        const order = await Order.findById(req.params.id);
+
+        if (!order) {
+            res.status(404);
+            throw new Error('Order not found');
+        }
+
+        const role = req.user.role;
+        const currentStatus = order.orderStatus;
+
+        // Status flow: placed -> accepted -> preparing -> ready -> out-for-delivery -> delivered
+        const statusSequence = ['placed', 'accepted', 'preparing', 'ready', 'out-for-delivery', 'delivered'];
+
+        const currentIndex = statusSequence.indexOf(currentStatus);
+        const nextIndex = statusSequence.indexOf(status);
+
+        if (nextIndex === -1) {
+            res.status(400);
+            throw new Error('Invalid status');
+        }
+
+        if (nextIndex !== currentIndex + 1) {
+            res.status(400);
+            throw new Error(`Invalid status transition. Cannot go from ${currentStatus} to ${status}`);
+        }
+
+        // Role-based validation
+        if (role === 'restaurant') {
+            // Restaurant can only update: placed -> accepted -> preparing -> ready
+            if (!['accepted', 'preparing', 'ready'].includes(status)) {
+                res.status(403);
+                throw new Error('Restaurants can only update up to "ready" status');
+            }
+
+            // Verify ownership
+            const restaurant = await Restaurant.findOne({ owner: req.user._id, _id: order.restaurant });
+            if (!restaurant) {
+                res.status(403);
+                throw new Error('You do not have permission to update this restaurant\'s orders');
+            }
+
+            if (status === 'accepted' && estimatedDeliveryTime) {
+                order.estimatedDeliveryTime = estimatedDeliveryTime;
+            }
+        }
+        else if (role === 'delivery') {
+            // Delivery Partner can only update: ready -> out-for-delivery -> delivered
+            if (!['out-for-delivery', 'delivered'].includes(status)) {
+                res.status(403);
+                throw new Error('Delivery partners can only update "out-for-delivery" or "delivered" status');
+            }
+
+            // If marking as out-for-delivery, assign the partner
+            if (status === 'out-for-delivery') {
+                order.deliveryPartner = req.user._id;
+            } else if (order.deliveryPartner && order.deliveryPartner.toString() !== req.user._id.toString()) {
+                res.status(403);
+                throw new Error('You are not assigned to this order');
+            }
+        }
+        else {
+            res.status(403);
+            throw new Error('Unauthorized role for status updates');
+        }
+
+        order.orderStatus = status;
+        await order.save();
+
+        res.json({ message: `Order status updated to ${status}`, order });
+    } catch (error) {
+        next(error);
+    }
+};
+
+// @desc    Get incoming orders for restaurant
+// @route   GET /api/orders/restaurant-orders
+// @access  Private/Restaurant
+export const getIncomingOrders = async (req, res, next) => {
+    try {
+        const restaurant = await Restaurant.findOne({ owner: req.user._id });
+        if (!restaurant) {
+            res.status(404);
+            throw new Error('Restaurant not found for this user');
+        }
+
+        const orders = await Order.find({
+            restaurant: restaurant._id,
+            orderStatus: { $in: ['placed', 'accepted', 'preparing', 'ready'] }
+        }).populate('customer', 'name phone')
+            .populate('items.menuItem', 'name')
+            .sort({ createdAt: -1 });
+
+        res.json(orders);
+    } catch (error) {
+        next(error);
+    }
+};
+
+// @desc    Get assigned orders for delivery partner
+// @route   GET /api/orders/delivery-orders
+// @access  Private/Delivery
+export const getAssignedOrders = async (req, res, next) => {
+    try {
+        // Find orders ready for pickup or assigned to this partner
+        const orders = await Order.find({
+            $or: [
+                { orderStatus: 'ready' },
+                { deliveryPartner: req.user._id, orderStatus: { $in: ['out-for-delivery', 'delivered'] } }
+            ]
+        }).populate('customer', 'name phone addresses')
+            .populate('restaurant', 'name address contact')
+            .populate('items.menuItem', 'name')
+            .sort({ createdAt: -1 });
+
+        res.json(orders);
+    } catch (error) {
+        next(error);
+    }
 };
 
 // @desc    Get logged in user orders
@@ -109,3 +228,4 @@ export const getUserOrders = async (req, res, next) => {
         next(error);
     }
 };
+
