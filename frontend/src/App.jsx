@@ -5,6 +5,8 @@ import Login from './pages/Login';
 import Signup from './pages/Signup';
 import RestaurantMenu from './pages/RestaurantMenu';
 import Checkout from './pages/Checkout';
+import MyOrders from './pages/MyOrders';
+import TrackOrder from './pages/TrackOrder';
 import CartWidget from './components/CartWidget';
 import ProtectedRoute from './components/ProtectedRoute';
 import RestaurantDashboard from './pages/RestaurantDashboard';
@@ -23,6 +25,8 @@ function App() {
             <Route path="/signup" element={<Signup />} />
             <Route path="/restaurant/:id" element={<Home />} /> {/** Placeholder handled by nested elsewhere or similar */}
             <Route path="/checkout" element={<Checkout />} />
+            <Route path="/myorders" element={<ProtectedRoute allowedRoles={['customer']}><MyOrders /></ProtectedRoute>} />
+            <Route path="/track/:orderId" element={<ProtectedRoute allowedRoles={['customer']}><TrackOrder /></ProtectedRoute>} />
 
             {/* Dashboard Routes */}
             <Route path="/restaurant/dashboard" element={

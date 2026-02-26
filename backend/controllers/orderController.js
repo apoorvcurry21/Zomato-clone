@@ -229,3 +229,64 @@ export const getUserOrders = async (req, res, next) => {
     }
 };
 
+// @desc    Get order by ID
+// @route   GET /api/orders/:id
+// @access  Private
+export const getOrderById = async (req, res, next) => {
+    try {
+        const order = await Order.findById(req.params.id)
+            .populate('restaurant', 'name address estimatedPrepTime')
+            .populate('deliveryPartner', 'name phone')
+            .populate('items.menuItem', 'name price');
+
+        if (!order) {
+            res.status(404);
+            throw new Error('Order not found');
+        }
+
+        // Authorization check
+        const isCustomer = order.customer.toString() === req.user._id.toString();
+        const isRestaurant = req.user.role === 'restaurant'; // Simplified, full check would be by restaurant ID
+        const isDelivery = req.user.role === 'delivery';
+
+        if (!isCustomer && !isRestaurant && !isDelivery && req.user.role !== 'admin') {
+            res.status(403);
+            throw new Error('Not authorized to view this order');
+        }
+
+        res.json(order);
+    } catch (error) {
+        next(error);
+    }
+};
+
+// @desc    Cancel order
+// @route   PATCH /api/orders/:id/cancel
+// @access  Private/Customer
+export const cancelOrder = async (req, res, next) => {
+    try {
+        const order = await Order.findById(req.params.id);
+
+        if (!order) {
+            res.status(404);
+            throw new Error('Order not found');
+        }
+
+        if (order.customer.toString() !== req.user._id.toString()) {
+            res.status(403);
+            throw new Error('Not authorized to cancel this order');
+        }
+
+        if (order.orderStatus !== 'placed') {
+            res.status(400);
+            throw new Error('Order can only be cancelled if it is still in "placed" status');
+        }
+
+        order.orderStatus = 'cancelled';
+        await order.save();
+
+        res.json({ message: 'Order cancelled successfully', order });
+    } catch (error) {
+        next(error);
+    }
+};

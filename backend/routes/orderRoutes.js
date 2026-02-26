@@ -5,6 +5,8 @@ import {
     getIncomingOrders,
     getAssignedOrders,
     getUserOrders,
+    getOrderById,
+    cancelOrder
 } from '../controllers/orderController.js';
 import { protect, authorize } from '../middleware/authMiddleware.js';
 
@@ -15,5 +17,7 @@ router.patch('/:id/status', protect, authorize('restaurant', 'delivery'), update
 router.get('/restaurant-orders', protect, authorize('restaurant'), getIncomingOrders);
 router.get('/delivery-orders', protect, authorize('delivery'), getAssignedOrders);
 router.get('/myorders', protect, authorize('customer'), getUserOrders);
+router.get('/:id', protect, getOrderById);
+router.patch('/:id/cancel', protect, authorize('customer'), cancelOrder);
 
 export default router;

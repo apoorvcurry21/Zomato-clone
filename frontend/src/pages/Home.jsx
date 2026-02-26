@@ -217,7 +217,7 @@ const Home = () => {
             <footer className="bg-gray-100 py-16 border-t border-gray-200">
                 <div className="max-w-7xl mx-auto px-4 text-center">
                     <h2 className="text-4xl font-black italic text-gray-400 mb-4 opacity-50">zomato</h2>
-                    <p className="text-gray-500 mb-8">© 2026 Zomato Clone Project by Antigravity AI.</p>
+                    <p className="text-gray-500 mb-8">© 2026 Zomato Clone Project by Apoorv Gupta.</p>
                 </div>
             </footer>
         </div>
