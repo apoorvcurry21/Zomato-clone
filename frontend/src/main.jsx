@@ -6,14 +6,18 @@ import { AuthProvider } from './context/AuthContext'
 import { LocationProvider } from './context/LocationContext'
 import { CartProvider } from './context/CartContext'
 
+import ErrorBoundary from './components/ErrorBoundary'
+
 createRoot(document.getElementById('root')).render(
   <StrictMode>
-    <AuthProvider>
-      <LocationProvider>
-        <CartProvider>
-          <App />
-        </CartProvider>
-      </LocationProvider>
-    </AuthProvider>
+    <ErrorBoundary>
+      <AuthProvider>
+        <LocationProvider>
+          <CartProvider>
+            <App />
+          </CartProvider>
+        </LocationProvider>
+      </AuthProvider>
+    </ErrorBoundary>
   </StrictMode>,
 )

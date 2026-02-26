@@ -3,19 +3,19 @@ import React, { createContext, useState, useContext, useEffect } from 'react';
 const CartContext = createContext();
 
 export const CartProvider = ({ children }) => {
-    const [cartItems, setCartItems] = useState([]);
-    const [restaurantId, setRestaurantId] = useState(null);
+    const [cartItems, setCartItems] = useState(() => {
+        try {
+            const storedCart = localStorage.getItem('cart');
+            const parsed = storedCart ? JSON.parse(storedCart) : [];
+            return Array.isArray(parsed) ? parsed : [];
+        } catch (e) {
+            return [];
+        }
+    });
 
-    useEffect(() => {
-        const storedCart = localStorage.getItem('cart');
-        const storedRestId = localStorage.getItem('cartRestaurantId');
-        if (storedCart) {
-            setCartItems(JSON.parse(storedCart));
-        }
-        if (storedRestId) {
-            setRestaurantId(storedRestId);
-        }
-    }, []);
+    const [restaurantId, setRestaurantId] = useState(() => {
+        return localStorage.getItem('cartRestaurantId') || null;
+    });
 
     useEffect(() => {
         localStorage.setItem('cart', JSON.stringify(cartItems));

@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ShoppingBag, ChevronLeft, MapPin, Ticket, CreditCard, ChevronRight, CheckCircle2, AlertCircle, Home as HomeIcon, Briefcase } from 'lucide-react';
+import { ShoppingBag, ChevronLeft, MapPin, Ticket, CreditCard, ChevronRight, CheckCircle2, AlertCircle, Home as HomeIcon, Briefcase, Plus } from 'lucide-react';
 import api from '../api/axios';
 import { useCart } from '../context/CartContext';
 import { useAuth } from '../context/AuthContext';
@@ -137,8 +137,8 @@ const Checkout = () => {
                                     key={addr._id}
                                     onClick={() => setSelectedAddress(addr)}
                                     className={`p-4 rounded-xl border-2 transition-all cursor-pointer relative ${selectedAddress?._id === addr._id
-                                            ? 'border-zomato-red bg-red-50'
-                                            : 'border-gray-100 hover:border-gray-200 bg-white'
+                                        ? 'border-zomato-red bg-red-50'
+                                        : 'border-gray-100 hover:border-gray-200 bg-white'
                                         }`}
                                 >
                                     <div className="flex items-center mb-2">

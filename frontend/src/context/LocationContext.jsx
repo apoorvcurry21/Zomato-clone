@@ -24,4 +24,4 @@ export const LocationProvider = ({ children }) => {
     );
 };
 
-export const useLocation = () => useContext(LocationContext);
+export const useUserLocation = () => useContext(LocationContext);

@@ -3,11 +3,11 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Search, MapPin, Star, ArrowRight, Utensils, Bike } from 'lucide-react';
 import api from '../api/axios';
 import RestaurantCard from '../components/RestaurantCard';
-import { useLocation } from '../context/LocationContext';
+import { useUserLocation } from '../context/LocationContext';
 import { Link } from 'react-router-dom';
 
 const Home = () => {
-    const { pincode, updatePincode } = useLocation();
+    const { pincode, updatePincode } = useUserLocation();
     const [searchPincode, setSearchPincode] = useState(pincode || '');
     const [restaurants, setRestaurants] = useState([]);
     const [featured, setFeatured] = useState([]);
