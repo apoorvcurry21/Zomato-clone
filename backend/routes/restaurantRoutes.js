@@ -5,6 +5,7 @@ import {
     getAvailableRestaurants,
     getFeaturedRestaurants,
     searchRestaurants,
+    getRestaurantById,
 } from '../controllers/restaurantController.js';
 import { getRestaurantMenu } from '../controllers/menuController.js';
 import { protect, authorize } from '../middleware/authMiddleware.js';
@@ -15,6 +16,7 @@ const router = express.Router();
 router.get('/', getAvailableRestaurants);
 router.get('/featured', getFeaturedRestaurants);
 router.get('/search', searchRestaurants);
+router.get('/:id', getRestaurantById);
 router.get('/:restaurantId/menu', getRestaurantMenu);
 
 // Protected routes

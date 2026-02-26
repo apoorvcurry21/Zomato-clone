@@ -8,27 +8,38 @@ export const AuthProvider = ({ children }) => {
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
-        const storedUser = localStorage.getItem('user');
         const token = localStorage.getItem('token');
-        if (storedUser && token) {
-            setUser(JSON.parse(storedUser));
+        if (token) {
+            fetchProfile();
+        } else {
+            setLoading(false);
         }
-        setLoading(false);
     }, []);
+
+    const fetchProfile = async () => {
+        try {
+            const { data } = await api.get('/auth/profile');
+            setUser(data);
+            localStorage.setItem('user', JSON.stringify(data));
+        } catch (err) {
+            console.error('Failed to fetch profile:', err);
+            logout();
+        } finally {
+            setLoading(false);
+        }
+    };
 
     const login = async (email, password) => {
         const { data } = await api.post('/auth/login', { email, password });
-        setUser({ _id: data._id, name: data.name, email: data.email, role: data.role });
         localStorage.setItem('token', data.token);
-        localStorage.setItem('user', JSON.stringify({ _id: data._id, name: data.name, email: data.email, role: data.role }));
+        await fetchProfile(); // Fetch full profile including addresses
         return data;
     };
 
     const register = async (userData) => {
         const { data } = await api.post('/auth/register', userData);
-        setUser({ _id: data._id, name: data.name, email: data.email, role: data.role });
         localStorage.setItem('token', data.token);
-        localStorage.setItem('user', JSON.stringify({ _id: data._id, name: data.name, email: data.email, role: data.role }));
+        await fetchProfile();
         return data;
     };
 
