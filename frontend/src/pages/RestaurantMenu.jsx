@@ -159,14 +159,14 @@ const RestaurantMenu = () => {
                                             <div className="flex items-center justify-between bg-white border border-gray-200 rounded-lg py-1 px-2 shadow-md">
                                                 <button
                                                     onClick={() => removeItem(item._id)}
-                                                    className="text-zomato-red hover:bg-red-50 p-1 rounded transition-colors"
+                                                    className="text-zomato-red hover:bg-red-50 p-1 rounded transition-colors bg-transparent border-none flex items-center justify-center"
                                                 >
                                                     <Minus size={16} />
                                                 </button>
                                                 <span className="font-bold text-zomato-red">{getItemQuantity(item._id)}</span>
                                                 <button
                                                     onClick={() => addItem(item, id)}
-                                                    className="text-zomato-red hover:bg-red-50 p-1 rounded transition-colors"
+                                                    className="text-zomato-red hover:bg-red-50 p-1 rounded transition-colors bg-transparent border-none flex items-center justify-center"
                                                 >
                                                     <Plus size={16} />
                                                 </button>

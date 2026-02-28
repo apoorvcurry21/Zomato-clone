@@ -55,7 +55,7 @@ const CartWidget = () => {
                                     <ShoppingBag className="text-zomato-red mr-2" size={24} />
                                     Your Cart
                                 </h3>
-                                <button onClick={() => setIsOpen(false)} className="p-2 hover:bg-gray-100 rounded-full transition-colors">
+                                <button onClick={() => setIsOpen(false)} className="p-2 hover:bg-gray-100 rounded-full transition-colors bg-transparent border-none">
                                     <X size={20} />
                                 </button>
                             </div>
@@ -73,9 +73,9 @@ const CartWidget = () => {
                                             <p className="text-gray-500 text-xs">₹{item.price}</p>
                                         </div>
                                         <div className="flex items-center bg-gray-50 rounded-lg p-1 border border-gray-100">
-                                            <button onClick={() => removeItem(item._id)} className="p-1 hover:text-zomato-red"><Minus size={14} /></button>
+                                            <button onClick={() => removeItem(item._id)} className="p-1 hover:text-zomato-red bg-transparent border-none flex items-center justify-center"><Minus size={14} /></button>
                                             <span className="mx-3 text-sm font-black text-gray-700">{item.quantity}</span>
-                                            <button onClick={() => addItem(item, item.restaurant)} className="p-1 hover:text-zomato-red"><Plus size={14} /></button>
+                                            <button onClick={() => addItem(item, item.restaurant)} className="p-1 hover:text-zomato-red bg-transparent border-none flex items-center justify-center"><Plus size={14} /></button>
                                         </div>
                                     </div>
                                 ))}
