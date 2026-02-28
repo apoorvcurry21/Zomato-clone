@@ -114,7 +114,9 @@ const RestaurantDashboard = () => {
                     </div>
                     <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
                         <p className="text-gray-400 text-sm font-bold uppercase tracking-wider mb-1">In Preparation</p>
-                        <h3 className="text-3xl font-black text-orange-500">{orders.filter(o => o.orderStatus === 'preparing').length}</h3>
+                        <h3 className="text-3xl font-black text-orange-500">
+                            {orders.filter(o => ['accepted', 'preparing'].includes(o.orderStatus)).length}
+                        </h3>
                     </div>
                     <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
                         <p className="text-gray-400 text-sm font-bold uppercase tracking-wider mb-1">Ready</p>
@@ -176,8 +178,10 @@ const RestaurantDashboard = () => {
                                                 <span className="bg-gray-100 px-3 py-1 rounded-full text-xs font-black text-gray-500 uppercase tracking-widest">
                                                     #{order._id.slice(-6)}
                                                 </span>
-                                                <span className={`px-3 py-1 rounded-full text-xs font-bold uppercase tracking-tighter ${order.orderStatus === 'placed' ? 'bg-orange-50 text-orange-500' :
-                                                    order.orderStatus === 'preparing' ? 'bg-blue-50 text-blue-500' : 'bg-green-50 text-green-500'
+                                                <span className={`px-3 py-1 rounded-full text-xs font-bold uppercase tracking-tighter ${order.orderStatus === 'placed' ? 'bg-gray-100 text-gray-500' :
+                                                        order.orderStatus === 'accepted' ? 'bg-blue-50 text-blue-500' :
+                                                            order.orderStatus === 'preparing' ? 'bg-orange-50 text-orange-500' :
+                                                                'bg-green-50 text-green-500'
                                                     }`}>
                                                     {order.orderStatus}
                                                 </span>
@@ -191,10 +195,18 @@ const RestaurantDashboard = () => {
                                         <div className="flex items-center space-x-3">
                                             {order.orderStatus === 'placed' && (
                                                 <button
-                                                    onClick={() => updateOrderStatus(order._id, 'preparing')}
+                                                    onClick={() => updateOrderStatus(order._id, 'accepted')}
                                                     className="bg-gray-900 text-white px-6 py-2 rounded-xl text-sm font-bold hover:bg-black transition-all"
                                                 >
                                                     Accept Order
+                                                </button>
+                                            )}
+                                            {order.orderStatus === 'accepted' && (
+                                                <button
+                                                    onClick={() => updateOrderStatus(order._id, 'preparing')}
+                                                    className="bg-blue-600 text-white px-6 py-2 rounded-xl text-sm font-bold hover:bg-blue-700 transition-all"
+                                                >
+                                                    Start Preparing
                                                 </button>
                                             )}
                                             {order.orderStatus === 'preparing' && (
@@ -202,7 +214,7 @@ const RestaurantDashboard = () => {
                                                     onClick={() => updateOrderStatus(order._id, 'ready')}
                                                     className="bg-orange-500 text-white px-6 py-2 rounded-xl text-sm font-bold hover:bg-orange-600 transition-all"
                                                 >
-                                                    Set to Ready
+                                                    Mark as Ready
                                                 </button>
                                             )}
                                             {order.orderStatus === 'ready' && (
