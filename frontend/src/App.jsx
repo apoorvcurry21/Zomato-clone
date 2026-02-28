@@ -1,4 +1,4 @@
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import Navbar from './components/Navbar';
 import Home from './pages/Home';
 import Login from './pages/Login';
@@ -23,7 +23,7 @@ function App() {
             <Route path="/" element={<Home />} />
             <Route path="/login" element={<Login />} />
             <Route path="/signup" element={<Signup />} />
-            <Route path="/restaurant/:id" element={<Home />} /> {/** Placeholder handled by nested elsewhere or similar */}
+            <Route path="/restaurant/:id" element={<RestaurantMenu />} />
             <Route path="/checkout" element={<Checkout />} />
             <Route path="/myorders" element={<ProtectedRoute allowedRoles={['customer']}><MyOrders /></ProtectedRoute>} />
             <Route path="/track/:orderId" element={<ProtectedRoute allowedRoles={['customer']}><TrackOrder /></ProtectedRoute>} />
@@ -52,6 +52,9 @@ function App() {
             <Route path="/admin/users" element={<ProtectedRoute allowedRoles={['admin']}><AdminDashboard /></ProtectedRoute>} />
             <Route path="/admin/restaurants" element={<ProtectedRoute allowedRoles={['admin']}><AdminDashboard /></ProtectedRoute>} />
             <Route path="/admin/orders" element={<ProtectedRoute allowedRoles={['admin']}><AdminDashboard /></ProtectedRoute>} />
+
+            {/* Catch-all route to prevent blank pages */}
+            <Route path="*" element={<Navigate to="/" replace />} />
           </Routes>
         </main>
         <CartWidget />

@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Star, X, MessageSquare, CheckCircle2 } from 'lucide-react';
+import { Star, X, MessageSquare, CheckCircle2, ShoppingBag } from 'lucide-react';
 import api from '../api/axios';
 
 const RatingModal = ({ isOpen, onClose, orderId, restaurantId, restaurantName }) => {

@@ -1,6 +1,6 @@
 import React from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { ShoppingBag, User as UserIcon, LogOut, Search, MapPin } from 'lucide-react';
+import { ShoppingBag, User as UserIcon, LogOut, Search, MapPin, Utensils } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 
 const Navbar = () => {
@@ -42,10 +42,18 @@ const Navbar = () => {
 
                     {user ? (
                         <div className="flex items-center space-x-6">
-                            <Link to="/orders" className="hover:text-zomato-red transition-colors flex items-center">
-                                <ShoppingBag size={20} className="mr-1" />
-                                <span className="hidden sm:inline">Orders</span>
-                            </Link>
+                            {user.role === 'customer' && (
+                                <Link to="/myorders" className="hover:text-zomato-red transition-colors flex items-center">
+                                    <ShoppingBag size={20} className="mr-1" />
+                                    <span className="hidden sm:inline">My Orders</span>
+                                </Link>
+                            )}
+                            {(user.role === 'restaurant' || user.role === 'delivery' || user.role === 'admin') && (
+                                <Link to={`/${user.role}/dashboard`} className="hover:text-zomato-red transition-colors font-bold flex items-center">
+                                    <Utensils size={20} className="mr-1" />
+                                    <span className="hidden sm:inline">Dashboard</span>
+                                </Link>
+                            )}
                             <div className="flex items-center space-x-2 border-l pl-6 border-gray-200">
                                 <UserIcon size={20} />
                                 <span className="hidden sm:inline text-sm">{user.name}</span>
