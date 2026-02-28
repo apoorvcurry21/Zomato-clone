@@ -126,3 +126,18 @@ export const getRestaurantById = async (req, res, next) => {
         next(error);
     }
 };
+// @desc    Get current user's restaurant profile
+// @route   GET /api/restaurants/my-restaurant
+// @access  Private/Restaurant
+export const getMyRestaurantProfile = async (req, res, next) => {
+    try {
+        const restaurant = await Restaurant.findOne({ owner: req.user._id });
+        if (!restaurant) {
+            res.status(404);
+            throw new Error('Restaurant not found');
+        }
+        res.json(restaurant);
+    } catch (error) {
+        next(error);
+    }
+};

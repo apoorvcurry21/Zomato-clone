@@ -29,7 +29,7 @@ export const protect = async (req, res, next) => {
                 throw new Error('User is blocked');
             }
 
-            next();
+            return next();
         } catch (error) {
             console.error(error);
             res.status(401);

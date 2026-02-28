@@ -23,6 +23,8 @@ const RestaurantDashboard = () => {
     const [menuItems, setMenuItems] = useState([]);
     const [restaurant, setRestaurant] = useState(null);
     const [loading, setLoading] = useState(true);
+    const [error, setError] = useState(null);
+    const [toggling, setToggling] = useState(false);
 
     useEffect(() => {
         fetchDashboardData();
@@ -30,18 +32,23 @@ const RestaurantDashboard = () => {
 
     const fetchDashboardData = async () => {
         setLoading(true);
+        setError(null);
         try {
-            // In a real app, we'd fetch the restaurant profile first
-            const resProfile = await api.get('/restaurants/featured'); // Placeholder for 'get my restaurant'
-            setRestaurant(resProfile.data[0]); // Using first as mock
+            const resProfile = await api.get('/restaurants/my-restaurant');
+            if (resProfile.data) {
+                setRestaurant(resProfile.data);
 
-            const ordersRes = await api.get('/orders/restaurant-orders');
-            setOrders(ordersRes.data);
+                const ordersRes = await api.get('/orders/restaurant-orders');
+                setOrders(ordersRes.data);
 
-            const menuRes = await api.get(`/restaurants/${resProfile.data[0]._id}/menu`);
-            setMenuItems(menuRes.data);
+                const menuRes = await api.get(`/restaurants/${resProfile.data._id}/menu`);
+                setMenuItems(menuRes.data);
+            } else {
+                setError('No restaurant found for this account.');
+            }
         } catch (err) {
             console.error('Error fetching dashboard data:', err);
+            setError(err.response?.data?.message || 'Failed to load dashboard data. Please try again.');
         } finally {
             setLoading(false);
         }
@@ -51,18 +58,23 @@ const RestaurantDashboard = () => {
         try {
             await api.patch(`/orders/${orderId}/status`, { status });
             // Update local state
-            setOrders(orders.map(o => o._id === orderId ? { ...o, status } : o));
+            setOrders(orders.map(o => o._id === orderId ? { ...o, orderStatus: status } : o));
         } catch (err) {
             console.error('Failed to update status:', err);
         }
     };
 
     const toggleStoreStatus = async () => {
+        if (toggling) return;
+        setToggling(true);
         try {
-            await api.patch('/restaurants/status');
-            setRestaurant({ ...restaurant, isOpen: !restaurant.isOpen });
+            const res = await api.patch('/restaurants/status');
+            setRestaurant({ ...restaurant, isOpen: res.data.isOpen });
         } catch (err) {
             console.error('Failed to toggle status:', err);
+            alert('Failed to update store status. Please try again.');
+        } finally {
+            setToggling(false);
         }
     };
 
@@ -75,6 +87,22 @@ const RestaurantDashboard = () => {
         </DashboardLayout>
     );
 
+    if (error) return (
+        <DashboardLayout>
+            <div className="flex flex-col items-center justify-center py-20 bg-white rounded-2xl border border-dashed border-red-200">
+                <XCircle size={48} className="text-red-500 mb-4" />
+                <h3 className="text-xl font-bold text-gray-800 mb-2">Error Loading Dashboard</h3>
+                <p className="text-gray-500 mb-6">{error}</p>
+                <button
+                    onClick={fetchDashboardData}
+                    className="bg-zomato-red text-white px-8 py-3 rounded-xl font-bold hover:bg-red-600 transition-all"
+                >
+                    Try Again
+                </button>
+            </div>
+        </DashboardLayout>
+    );
+
     return (
         <DashboardLayout>
             <div className="max-w-6xl mx-auto">
@@ -82,15 +110,15 @@ const RestaurantDashboard = () => {
                 <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
                     <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
                         <p className="text-gray-400 text-sm font-bold uppercase tracking-wider mb-1">New Orders</p>
-                        <h3 className="text-3xl font-black text-gray-800">{orders.filter(o => o.status === 'placed').length}</h3>
+                        <h3 className="text-3xl font-black text-gray-800">{orders.filter(o => o.orderStatus === 'placed').length}</h3>
                     </div>
                     <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
                         <p className="text-gray-400 text-sm font-bold uppercase tracking-wider mb-1">In Preparation</p>
-                        <h3 className="text-3xl font-black text-orange-500">{orders.filter(o => o.status === 'preparing').length}</h3>
+                        <h3 className="text-3xl font-black text-orange-500">{orders.filter(o => o.orderStatus === 'preparing').length}</h3>
                     </div>
                     <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
                         <p className="text-gray-400 text-sm font-bold uppercase tracking-wider mb-1">Ready</p>
-                        <h3 className="text-3xl font-black text-green-500">{orders.filter(o => o.status === 'ready').length}</h3>
+                        <h3 className="text-3xl font-black text-green-500">{orders.filter(o => o.orderStatus === 'ready').length}</h3>
                     </div>
                     <div className="bg-zomato-red p-6 rounded-2xl shadow-lg border-2 border-white flex justify-between items-center text-white">
                         <div>
@@ -99,7 +127,8 @@ const RestaurantDashboard = () => {
                         </div>
                         <button
                             onClick={toggleStoreStatus}
-                            className={`w-12 h-6 rounded-full relative transition-colors ${restaurant?.isOpen ? 'bg-white' : 'bg-gray-400/30'}`}
+                            disabled={toggling}
+                            className={`w-12 h-6 rounded-full relative transition-colors ${toggling ? 'opacity-50 cursor-not-allowed' : ''} ${restaurant?.isOpen ? 'bg-white' : 'bg-gray-400/30'}`}
                         >
                             <div className={`absolute top-1 w-4 h-4 rounded-full transition-all ${restaurant?.isOpen ? 'right-1 bg-zomato-red' : 'left-1 bg-white'}`}></div>
                         </button>
@@ -147,10 +176,10 @@ const RestaurantDashboard = () => {
                                                 <span className="bg-gray-100 px-3 py-1 rounded-full text-xs font-black text-gray-500 uppercase tracking-widest">
                                                     #{order._id.slice(-6)}
                                                 </span>
-                                                <span className={`px-3 py-1 rounded-full text-xs font-bold uppercase tracking-tighter ${order.status === 'placed' ? 'bg-orange-50 text-orange-500' :
-                                                        order.status === 'preparing' ? 'bg-blue-50 text-blue-500' : 'bg-green-50 text-green-500'
+                                                <span className={`px-3 py-1 rounded-full text-xs font-bold uppercase tracking-tighter ${order.orderStatus === 'placed' ? 'bg-orange-50 text-orange-500' :
+                                                    order.orderStatus === 'preparing' ? 'bg-blue-50 text-blue-500' : 'bg-green-50 text-green-500'
                                                     }`}>
-                                                    {order.status}
+                                                    {order.orderStatus}
                                                 </span>
                                             </div>
                                             <div className="text-sm font-bold text-gray-800 mb-1">
@@ -160,7 +189,7 @@ const RestaurantDashboard = () => {
                                         </div>
 
                                         <div className="flex items-center space-x-3">
-                                            {order.status === 'placed' && (
+                                            {order.orderStatus === 'placed' && (
                                                 <button
                                                     onClick={() => updateOrderStatus(order._id, 'preparing')}
                                                     className="bg-gray-900 text-white px-6 py-2 rounded-xl text-sm font-bold hover:bg-black transition-all"
@@ -168,7 +197,7 @@ const RestaurantDashboard = () => {
                                                     Accept Order
                                                 </button>
                                             )}
-                                            {order.status === 'preparing' && (
+                                            {order.orderStatus === 'preparing' && (
                                                 <button
                                                     onClick={() => updateOrderStatus(order._id, 'ready')}
                                                     className="bg-orange-500 text-white px-6 py-2 rounded-xl text-sm font-bold hover:bg-orange-600 transition-all"
@@ -176,7 +205,7 @@ const RestaurantDashboard = () => {
                                                     Set to Ready
                                                 </button>
                                             )}
-                                            {order.status === 'ready' && (
+                                            {order.orderStatus === 'ready' && (
                                                 <div className="flex items-center text-green-600 text-sm font-bold bg-green-50 px-6 py-2 rounded-xl">
                                                     <CheckCircle2 size={18} className="mr-2" />
                                                     Waiting for Pickup
