@@ -3,15 +3,17 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ShoppingBag, ChevronRight, X, Minus, Plus } from 'lucide-react';
 import { useCart } from '../context/CartContext';
+import { useAuth } from '../context/AuthContext';
 
 const CartWidget = () => {
     const { totalItems, totalAmount, cartItems, addItem, removeItem } = useCart();
+    const { user } = useAuth();
     const [isOpen, setIsOpen] = useState(false);
     const navigate = useNavigate();
     const location = useLocation();
 
-    // Don't show on checkout page or if cart is empty
-    if (location.pathname === '/checkout' || totalItems === 0) return null;
+    // Don't show if not logged in, not a customer, on checkout page, or if cart is empty
+    if (!user || user.role !== 'customer' || location.pathname === '/checkout' || totalItems === 0) return null;
 
     return (
         <>

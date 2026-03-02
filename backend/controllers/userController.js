@@ -52,3 +52,32 @@ export const applyToBeRestaurant = async (req, res, next) => {
         next(error);
     }
 };
+// @desc    Add a new address
+// @route   POST /api/users/address
+// @access  Private
+export const addAddress = async (req, res, next) => {
+    try {
+        const { type, pincode, addressLine } = req.body;
+
+        if (!type || !pincode || !addressLine) {
+            res.status(400);
+            throw new Error('Please provide all address details');
+        }
+
+        const user = await User.findById(req.user._id);
+        if (!user) {
+            res.status(404);
+            throw new Error('User not found');
+        }
+
+        user.addresses.push({ type, pincode, addressLine });
+        await user.save();
+
+        res.status(201).json({
+            message: 'Address added successfully',
+            addresses: user.addresses
+        });
+    } catch (error) {
+        next(error);
+    }
+};

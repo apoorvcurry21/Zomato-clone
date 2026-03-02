@@ -54,10 +54,12 @@ export const AuthProvider = ({ children }) => {
         setUser(null);
         localStorage.removeItem('token');
         localStorage.removeItem('user');
+        localStorage.removeItem('cart');
+        localStorage.removeItem('cartRestaurantId');
     };
 
     return (
-        <AuthContext.Provider value={{ user, loading, login, register, logout }}>
+        <AuthContext.Provider value={{ user, loading, login, register, logout, fetchProfile }}>
             {children}
         </AuthContext.Provider>
     );

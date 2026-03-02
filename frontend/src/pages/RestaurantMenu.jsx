@@ -4,15 +4,29 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Clock, Star, MapPin, ChevronRight, Plus, Minus, ShoppingBag, Leaf, Info, Utensils } from 'lucide-react';
 import api from '../api/axios';
 import { useCart } from '../context/CartContext';
+import { useAuth } from '../context/AuthContext';
 
 const RestaurantMenu = () => {
     const { id } = useParams();
     const navigate = useNavigate();
+    const { user } = useAuth();
     const [restaurant, setRestaurant] = useState(null);
     const [menuItems, setMenuItems] = useState([]);
     const [loading, setLoading] = useState(true);
     const [activeCategory, setActiveCategory] = useState('All');
     const { cartItems, addItem, removeItem, totalAmount, totalItems } = useCart();
+
+    const handleAddToCart = (item) => {
+        if (!user) {
+            navigate('/login');
+            return;
+        }
+        if (user.role !== 'customer') {
+            alert('Only customers can order food.');
+            return;
+        }
+        addItem(item, id);
+    };
 
     useEffect(() => {
         fetchRestaurantData();
@@ -165,7 +179,7 @@ const RestaurantMenu = () => {
                                                 </button>
                                                 <span className="font-bold text-zomato-red">{getItemQuantity(item._id)}</span>
                                                 <button
-                                                    onClick={() => addItem(item, id)}
+                                                    onClick={() => handleAddToCart(item)}
                                                     className="text-zomato-red hover:bg-red-50 p-1 rounded transition-colors bg-transparent border-none flex items-center justify-center"
                                                 >
                                                     <Plus size={16} />
@@ -173,7 +187,7 @@ const RestaurantMenu = () => {
                                             </div>
                                         ) : (
                                             <button
-                                                onClick={() => addItem(item, id)}
+                                                onClick={() => handleAddToCart(item)}
                                                 className="w-full bg-white border border-gray-200 text-zomato-red font-bold py-1.5 px-4 rounded-lg shadow-md hover:bg-gray-50 transition-colors uppercase tracking-tight"
                                             >
                                                 Add
@@ -196,7 +210,7 @@ const RestaurantMenu = () => {
 
             {/* Cart Float Widget */}
             <AnimatePresence>
-                {totalItems > 0 && (
+                {totalItems > 0 && user?.role === 'customer' && (
                     <motion.div
                         initial={{ y: 100 }}
                         animate={{ y: 0 }}

@@ -1,23 +1,60 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ShoppingBag, ChevronLeft, MapPin, Ticket, CreditCard, ChevronRight, CheckCircle2, AlertCircle, Home as HomeIcon, Briefcase, Plus, Info } from 'lucide-react';
+import { ShoppingBag, ChevronLeft, MapPin, Ticket, CreditCard, ChevronRight, CheckCircle2, AlertCircle, Home as HomeIcon, Briefcase, Plus, Info, XCircle } from 'lucide-react';
 import api from '../api/axios';
 import { useCart } from '../context/CartContext';
 import { useAuth } from '../context/AuthContext';
 
 const Checkout = () => {
     const navigate = useNavigate();
-    const { user } = useAuth();
+    const { user, fetchProfile } = useAuth();
     const { cartItems, restaurantId, totalAmount, clearCart } = useCart();
 
     const [selectedAddress, setSelectedAddress] = useState(null);
+    const [showAddressModal, setShowAddressModal] = useState(false);
+    const [newAddress, setNewAddress] = useState({
+        type: 'home',
+        pincode: '',
+        addressLine: ''
+    });
+    const [addingAddress, setAddingAddress] = useState(false);
     const [couponCode, setCouponCode] = useState('');
     const [discount, setDiscount] = useState(0);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState('');
     const [success, setSuccess] = useState(false);
     const [applyingCoupon, setApplyingCoupon] = useState(false);
+
+    const handleAddAddress = async (e) => {
+        e.preventDefault();
+        setAddingAddress(true);
+        setError('');
+        try {
+            const { data } = await api.post('/users/address', newAddress);
+            await fetchProfile(); // Refresh user data to get the new address (with its ID)
+            setShowAddressModal(false);
+            setNewAddress({ type: 'home', pincode: '', addressLine: '' });
+
+            // The new address should be the last one in the refreshed user.addresses
+        } catch (err) {
+            setError(err.response?.data?.message || 'Failed to add address');
+        } finally {
+            setAddingAddress(false);
+        }
+    };
+
+    // Auto-select newly added address
+    useEffect(() => {
+        if (user && user.addresses && user.addresses.length > 0) {
+            // Find the most recently added address
+            const mostRecent = user.addresses[user.addresses.length - 1];
+            // If no address selected OR we just added a new one, select it
+            if (!selectedAddress) {
+                setSelectedAddress(mostRecent);
+            }
+        }
+    }, [user?.addresses]);
 
     useEffect(() => {
         if (!user) {
@@ -156,10 +193,13 @@ const Checkout = () => {
                                 </div>
                             ))}
 
-                            <div className="p-4 rounded-xl border-2 border-dashed border-gray-200 flex flex-col items-center justify-center text-gray-400 hover:border-zomato-red hover:text-zomato-red cursor-not-allowed transition-all">
+                            <button
+                                onClick={() => setShowAddressModal(true)}
+                                className="p-4 rounded-xl border-2 border-dashed border-gray-200 flex flex-col items-center justify-center text-gray-400 hover:border-zomato-red hover:text-zomato-red hover:bg-red-50/30 transition-all"
+                            >
                                 <Plus size={24} className="mb-2" />
                                 <span className="font-bold text-sm">Add New Address</span>
-                            </div>
+                            </button>
                         </div>
                     </section>
 
@@ -286,6 +326,81 @@ const Checkout = () => {
                     </div>
                 </div>
             </div>
+
+            {/* Add Address Modal */}
+            <AnimatePresence>
+                {showAddressModal && (
+                    <>
+                        <motion.div
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: 1 }}
+                            exit={{ opacity: 0 }}
+                            onClick={() => setShowAddressModal(false)}
+                            className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[100]"
+                        />
+                        <motion.div
+                            initial={{ opacity: 0, scale: 0.9, y: 20 }}
+                            animate={{ opacity: 1, scale: 1, y: 0 }}
+                            exit={{ opacity: 0, scale: 0.9, y: 20 }}
+                            className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full max-w-md bg-white rounded-3xl shadow-2xl z-[110] overflow-hidden"
+                        >
+                            <div className="p-6 bg-gray-50 border-b border-gray-100 flex justify-between items-center">
+                                <h3 className="text-xl font-bold text-gray-800">Add New Address</h3>
+                                <button onClick={() => setShowAddressModal(false)} className="text-gray-400 hover:text-gray-600">
+                                    <XCircle size={24} />
+                                </button>
+                            </div>
+                            <form onSubmit={handleAddAddress} className="p-6 space-y-4">
+                                <div className="flex gap-4 p-1 bg-gray-100 rounded-xl">
+                                    {['home', 'work'].map((type) => (
+                                        <button
+                                            key={type}
+                                            type="button"
+                                            onClick={() => setNewAddress({ ...newAddress, type })}
+                                            className={`flex-1 py-2 rounded-lg font-bold text-sm capitalize transition-all ${newAddress.type === type ? 'bg-white text-zomato-red shadow-sm' : 'text-gray-500'}`}
+                                        >
+                                            {type}
+                                        </button>
+                                    ))}
+                                </div>
+                                <div>
+                                    <label className="block text-xs font-black text-gray-400 uppercase tracking-widest mb-1 ml-1">Pincode</label>
+                                    <input
+                                        required
+                                        type="text"
+                                        placeholder="e.g. 110001"
+                                        className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-zomato-red outline-none transition-all font-medium"
+                                        value={newAddress.pincode}
+                                        onChange={(e) => setNewAddress({ ...newAddress, pincode: e.target.value })}
+                                    />
+                                </div>
+                                <div>
+                                    <label className="block text-xs font-black text-gray-400 uppercase tracking-widest mb-1 ml-1">Address Line</label>
+                                    <textarea
+                                        required
+                                        rows="3"
+                                        placeholder="Flat no, Building, Street name..."
+                                        className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-zomato-red outline-none transition-all font-medium"
+                                        value={newAddress.addressLine}
+                                        onChange={(e) => setNewAddress({ ...newAddress, addressLine: e.target.value })}
+                                    ></textarea>
+                                </div>
+                                <button
+                                    type="submit"
+                                    disabled={addingAddress}
+                                    className="w-full bg-zomato-red text-white py-4 rounded-xl font-black text-lg hover:bg-red-600 transition-all shadow-lg flex justify-center items-center"
+                                >
+                                    {addingAddress ? (
+                                        <div className="w-5 h-5 border-3 border-white border-t-transparent rounded-full animate-spin"></div>
+                                    ) : (
+                                        'Save & Use Address'
+                                    )}
+                                </button>
+                            </form>
+                        </motion.div>
+                    </>
+                )}
+            </AnimatePresence>
         </div>
     );
 };
