@@ -16,9 +16,7 @@ const Home = () => {
 
     useEffect(() => {
         fetchFeatured();
-        if (pincode) {
-            fetchByPincode(pincode);
-        }
+        fetchByPincode(pincode);
     }, [pincode]);
 
     const fetchFeatured = async () => {
@@ -34,10 +32,11 @@ const Home = () => {
         setLoading(true);
         setError('');
         try {
-            const { data } = await api.get(`/restaurants?pincode=${code}`);
+            const url = code ? `/restaurants?pincode=${code}` : '/restaurants';
+            const { data } = await api.get(url);
             setRestaurants(data);
         } catch (err) {
-            setError('Failed to fetch restaurants for this location.');
+            setError('Failed to fetch restaurants.');
         } finally {
             setLoading(false);
         }
@@ -154,10 +153,10 @@ const Home = () => {
                         <div className="text-center py-20 bg-white rounded-3xl shadow-sm border border-gray-100">
                             <Utensils size={64} className="mx-auto text-gray-300 mb-6" />
                             <h3 className="text-2xl font-bold text-gray-700 mb-2">
-                                {pincode ? 'No restaurants found for this pincode.' : 'Enter your pincode to get started'}
+                                {pincode ? 'No restaurants found for this pincode.' : 'No restaurants available right now.'}
                             </h3>
                             <p className="text-gray-500 mb-8">
-                                {pincode ? 'Try another pincode or check back later.' : 'See which restaurants are delivering delicious food to your doorstep.'}
+                                {pincode ? 'Try another pincode or check back later.' : 'We are currently adding more partners. Please check back soon!'}
                             </p>
                             {!pincode && (
                                 <button

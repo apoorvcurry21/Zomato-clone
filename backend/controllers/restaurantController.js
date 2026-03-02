@@ -33,15 +33,12 @@ export const getAvailableRestaurants = async (req, res, next) => {
     try {
         const { pincode } = req.query;
 
-        if (!pincode) {
-            res.status(400);
-            throw new Error('Pincode is mandatory');
+        const query = { isOpen: true };
+        if (pincode) {
+            query.pincodes = pincode;
         }
 
-        const restaurants = await Restaurant.find({
-            pincodes: pincode,
-            isOpen: true
-        });
+        const restaurants = await Restaurant.find(query);
 
         res.json(restaurants);
     } catch (error) {
