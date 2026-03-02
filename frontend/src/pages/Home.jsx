@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Search, MapPin, Star, ArrowRight, Utensils, Bike } from 'lucide-react';
 import api from '../api/axios';
 import RestaurantCard from '../components/RestaurantCard';
+import Loading from '../components/Loading';
 import { useUserLocation } from '../context/LocationContext';
 import { Link } from 'react-router-dom';
 
@@ -142,10 +143,8 @@ const Home = () => {
                     </h2>
 
                     {loading ? (
-                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
-                            {[1, 2, 3, 4].map(i => (
-                                <div key={i} className="bg-white rounded-xl h-72 animate-pulse shadow-sm"></div>
-                            ))}
+                        <div className="py-20">
+                            <Loading />
                         </div>
                     ) : restaurants.length > 0 ? (
                         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
