@@ -16,16 +16,11 @@ export const createOrder = async (req, res, next) => {
             throw new Error('No order items');
         }
 
-        // 1. Verify Restaurant and Pincode
+        // 1. Verify Restaurant
         const restaurant = await Restaurant.findById(restaurantId);
         if (!restaurant) {
             res.status(404);
             throw new Error('Restaurant not found');
-        }
-
-        if (!restaurant.pincodes.includes(deliveryPincode)) {
-            res.status(400);
-            throw new Error('Restaurant does not serve this pincode');
         }
 
         // 2. Secure Price Calculation (fetch from DB)

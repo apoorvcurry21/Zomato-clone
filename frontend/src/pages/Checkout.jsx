@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ShoppingBag, ChevronLeft, MapPin, Ticket, CreditCard, ChevronRight, CheckCircle2, AlertCircle, Home as HomeIcon, Briefcase, Plus, Info, XCircle } from 'lucide-react';
+import { ShoppingBag, ChevronLeft, MapPin, Ticket, CreditCard, ChevronRight, CheckCircle2, AlertCircle, Home as HomeIcon, Briefcase, Plus, Info, XCircle, Trash2 } from 'lucide-react';
 import api from '../api/axios';
 import { useCart } from '../context/CartContext';
 import { useAuth } from '../context/AuthContext';
@@ -41,6 +41,21 @@ const Checkout = () => {
             setError(err.response?.data?.message || 'Failed to add address');
         } finally {
             setAddingAddress(false);
+        }
+    };
+
+    const handleDeleteAddress = async (e, addressId) => {
+        e.stopPropagation();
+        if (!window.confirm('Are you sure you want to delete this address?')) return;
+
+        try {
+            await api.delete(`/users/address/${addressId}`);
+            await fetchProfile();
+            if (selectedAddress?._id === addressId) {
+                setSelectedAddress(null);
+            }
+        } catch (err) {
+            setError(err.response?.data?.message || 'Failed to delete address');
         }
     };
 
@@ -173,7 +188,7 @@ const Checkout = () => {
                                 <div
                                     key={addr._id}
                                     onClick={() => setSelectedAddress(addr)}
-                                    className={`p-4 rounded-xl border-2 transition-all cursor-pointer relative ${selectedAddress?._id === addr._id
+                                    className={`p-4 rounded-xl border-2 transition-all cursor-pointer relative group ${selectedAddress?._id === addr._id
                                         ? 'border-zomato-red bg-red-50'
                                         : 'border-gray-100 hover:border-gray-200 bg-white'
                                         }`}
@@ -185,11 +200,20 @@ const Checkout = () => {
                                     <p className="text-gray-800 font-medium mb-1">{addr.addressLine}</p>
                                     <p className="text-gray-500 text-sm">Pincode: {addr.pincode}</p>
 
-                                    {selectedAddress?._id === addr._id && (
-                                        <div className="absolute top-3 right-3 text-zomato-red">
-                                            <CheckCircle2 size={20} />
-                                        </div>
-                                    )}
+                                    <div className="absolute top-3 right-3 flex items-center gap-2">
+                                        <button
+                                            onClick={(e) => handleDeleteAddress(e, addr._id)}
+                                            className="p-1.5 text-gray-300 hover:text-red-500 hover:bg-red-50 rounded-lg opacity-0 group-hover:opacity-100 transition-all bg-transparent border-none"
+                                            title="Delete Address"
+                                        >
+                                            <Trash2 size={16} />
+                                        </button>
+                                        {selectedAddress?._id === addr._id && (
+                                            <div className="text-zomato-red">
+                                                <CheckCircle2 size={20} />
+                                            </div>
+                                        )}
+                                    </div>
                                 </div>
                             ))}
 

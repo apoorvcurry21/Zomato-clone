@@ -19,7 +19,12 @@ import path from 'path';
 
 const app = express();
 
-app.use(cors());
+const corsOptions = {
+  origin: [process.env.FRONTEND_URL, 'http://localhost:5173', 'http://localhost:3000'].filter(Boolean),
+  credentials: true,
+};
+
+app.use(cors(corsOptions));
 app.use(express.json());
 
 connectDB();
@@ -51,6 +56,4 @@ app.use((err, req, res, next) => {
   });
 });
 
-app.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`);
-});
+app.listen(PORT, () => { });

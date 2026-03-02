@@ -81,3 +81,25 @@ export const addAddress = async (req, res, next) => {
         next(error);
     }
 };
+// @desc    Delete an address
+// @route   DELETE /api/users/address/:id
+// @access  Private
+export const deleteAddress = async (req, res, next) => {
+    try {
+        const user = await User.findById(req.user._id);
+        if (!user) {
+            res.status(404);
+            throw new Error('User not found');
+        }
+
+        user.addresses = user.addresses.filter(addr => addr._id.toString() !== req.params.id);
+        await user.save();
+
+        res.json({
+            message: 'Address deleted successfully',
+            addresses: user.addresses
+        });
+    } catch (error) {
+        next(error);
+    }
+};

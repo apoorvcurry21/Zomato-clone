@@ -12,6 +12,7 @@ import ProtectedRoute from './components/ProtectedRoute';
 import RestaurantDashboard from './pages/RestaurantDashboard';
 import DeliveryDashboard from './pages/DeliveryDashboard';
 import AdminDashboard from './pages/AdminDashboard';
+import NotFound from './pages/NotFound';
 
 function App() {
   return (
@@ -53,8 +54,8 @@ function App() {
             <Route path="/admin/restaurants" element={<ProtectedRoute allowedRoles={['admin']}><AdminDashboard /></ProtectedRoute>} />
             <Route path="/admin/orders" element={<ProtectedRoute allowedRoles={['admin']}><AdminDashboard /></ProtectedRoute>} />
 
-            {/* Catch-all route to prevent blank pages */}
-            <Route path="*" element={<Navigate to="/" replace />} />
+            {/* Catch-all route for 404 */}
+            <Route path="*" element={<NotFound />} />
           </Routes>
         </main>
         <CartWidget />
