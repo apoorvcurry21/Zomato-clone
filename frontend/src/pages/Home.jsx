@@ -44,10 +44,14 @@ const Home = () => {
 
     const handleSearch = (e) => {
         e.preventDefault();
-        if (searchPincode.length >= 6) {
+        if (searchPincode === '') {
+            updatePincode('');
+            setError('');
+        } else if (searchPincode.length >= 6) {
             updatePincode(searchPincode);
+            setError('');
         } else {
-            setError('Please enter a valid 6-digit pincode.');
+            setError('Please enter a valid 6-digit pincode or leave blank to see all.');
         }
     };
 

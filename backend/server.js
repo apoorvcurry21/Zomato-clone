@@ -20,7 +20,15 @@ import path from 'path';
 const app = express();
 
 const corsOptions = {
-  origin: [process.env.FRONTEND_URL, 'http://localhost:5173', 'http://localhost:3000'].filter(Boolean),
+  origin: function (origin, callback) {
+    const whiteList = [process.env.FRONTEND_URL, 'http://localhost:5173', 'http://localhost:3000'].filter(Boolean);
+    // Allow any vercel.app origin for this specific deployment phase to avoid blocking
+    if (!origin || whiteList.includes(origin) || origin.endsWith('.vercel.app')) {
+      callback(null, true);
+    } else {
+      callback(new Error('Not allowed by CORS'));
+    }
+  },
   credentials: true,
 };
 

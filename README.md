@@ -78,4 +78,4 @@ VITE_API_URL=http://localhost:5000/api
 4. Environment Variables: Set `VITE_API_URL` to your Render backend URL (e.g., `https://your-api.onrender.com/api`).
 
 ---
-*Created with ❤️ by Antigravity*
+
