@@ -2,7 +2,7 @@
 
 [**🚀 Live Demo**](https://zomato-clone-brown-seven.vercel.app)
 
-A feature-rich food delivery platform with role-based dashboards for Customers, Restaurant Owners, Delivery Partners, and Admins.
+A feature-rich food delivery platform with role-based dashboards for Customers and Restaurants.
 
 ## Tech Stack
 
@@ -56,14 +56,17 @@ VITE_API_URL=http://localhost:5000/api
    npm run dev
    ```
 
-## Accounts for Testing
+## Demo Accounts
 
-| Role | Email | Password |
-|------|-------|----------|
-| **Admin** | `admin@zomato.com` | `admin123` |
-| **Restaurant Owner** | `owner@pizza.com` | `owner123` |
-| **Delivery Partner** | `delivery@zomato.com` | `delivery123` |
-| **Customer** | `customer@zomato.com` | `customer@123` |
+### 👤 Guest Account (Customer)
+**Explore and order delicious food!**
+- **Email**: `customer@zomato.com`
+- **Password**: `password123`
+
+### 🍕 Restaurant Owner (Pizza Palace)
+**Manage orders and track live status!**
+- **Email**: `owner@pizza.com`
+- **Password**: `password123`
 
 ## Deployment Instructions
 
