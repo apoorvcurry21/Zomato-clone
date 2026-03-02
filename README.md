@@ -1,5 +1,7 @@
 # Zomato Clone - Full Stack MERN Application
 
+[**🚀 Live Demo**](https://zomato-clone-brown-seven.vercel.app)
+
 A feature-rich food delivery platform with role-based dashboards for Customers, Restaurant Owners, Delivery Partners, and Admins.
 
 ## Tech Stack
